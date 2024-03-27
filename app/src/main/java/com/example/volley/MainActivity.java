@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageRequest imageRequest;
     private AppCompatTextView info;
     private ConnectivityManager connectivityManager;
+    private VectorDrawableCompat vectorWifi;
     private ConnectivityManager.NetworkCallback networkCallback;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 }, l, a, ImageView.ScaleType.CENTER, null, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(MainActivity.this, "DEU BO: "+error.getCause(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "DEU ERRO: "+error.getCause(), Toast.LENGTH_SHORT).show();
                     }
                 });
                 queue = Volley.newRequestQueue(MainActivity.this);
