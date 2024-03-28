@@ -27,6 +27,7 @@ import java.util.HashMap;
 
 public class Post extends AppCompatActivity {
     AppCompatEditText nome, email;
+    String nomeS, emailS;
     ListView lista;
     AppCompatButton salvar, apagar;
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +45,7 @@ public class Post extends AppCompatActivity {
         apagar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(Post.this, "APAGAR", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Post.this, "BANCO LOCAL APAGADO", Toast.LENGTH_SHORT).show();
                 SQLiteDatabase banco = openOrCreateDatabase("banco", MODE_PRIVATE, null);
                 banco.execSQL("DROP TABLE IF EXISTS usuario");
                 criarTabela();
@@ -55,12 +56,14 @@ public class Post extends AppCompatActivity {
         salvar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                salvarDados();
-                enviarAoBanco(nome.getText().toString(), email.getText().toString());
+                nomeS = nome.getText().toString();
+                emailS = email.getText().toString()+"@gmail.com";
+                salvarDados(nomeS, emailS);
+                enviarAoBanco(nomeS, emailS);
             }
         });
     }
-    public void salvarDados(){
+    public void salvarDados(String nome, String email){
         try{
             SQLiteDatabase banco = openOrCreateDatabase("banco", MODE_PRIVATE, null);
             banco.execSQL("CREATE TABLE IF NOT EXISTS usuario(" +
@@ -71,10 +74,9 @@ public class Post extends AppCompatActivity {
                     "nome, " +
                     "email) VALUES(?, ?)";
             SQLiteStatement stmt = banco.compileStatement(query);
-            stmt.bindString(1, nome.getText().toString());
-            stmt.bindString(2, email.getText().toString());
+            stmt.bindString(1, nome);
+            stmt.bindString(2, email);
             stmt.executeInsert();
-            Toast.makeText(this, "DADOS SALVOS", Toast.LENGTH_SHORT).show();
             banco.close();
             listarDados();
         }catch(Exception e){
@@ -85,10 +87,9 @@ public class Post extends AppCompatActivity {
     public void listarDados(){
         try{
             SQLiteDatabase banco = openOrCreateDatabase("banco", MODE_PRIVATE, null);
-            Cursor cursor = banco.rawQuery("SELECT nome FROM usuario",null);
+            Cursor cursor = banco.rawQuery("SELECT email FROM usuario",null);
             cursor.moveToFirst();
             ArrayList<String> array = new ArrayList<>();
-            Toast.makeText(this, "CURSOR.getCount(): "+cursor.getCount(), Toast.LENGTH_SHORT).show();
             int i = 0;
             while(cursor.getCount()!=0 && !(cursor.isAfterLast())){
                 i++;
@@ -119,25 +120,27 @@ public class Post extends AppCompatActivity {
         }
     }
     public void enviarAoBanco(String nome, String email){
-        String url = "";
+        String url = "seu host";
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(Request.Method.POST,
                 url,
                 new Response.Listener<String>(){
                     @Override
                     public void onResponse(String response) {
-                        Toast.makeText(Post.this, "SUCCESS: "+response, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Post.this, "SUCCESS: "+nome+email+" RESPONSE: "+response, Toast.LENGTH_SHORT).show();
+                        Log.e("SECESSO", "RESPONSE: "+response.toString());
                     }
                 },
         new Response.ErrorListener(){
             @Override
             public void onErrorResponse(VolleyError error) {
+                Log.e("CONNECTION ERROR: ", "erro: "+error.getMessage());
                 Toast.makeText(Post.this, "ERROR: "+ error, Toast.LENGTH_SHORT).show();
             }
         }){
             protected HashMap<String, String> getParamas() throws AuthFailureError{
-                HashMap<String, String> map = new HashMap<>();
-                map.put("name", nome);
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("nome", nome);
                 map.put("email",email);
                 return map;
             }
